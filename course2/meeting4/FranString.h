@@ -8,7 +8,7 @@ class FranString
 	int currentLength;
 	
 public:
-	FranString(void);
+	FranString();
 	FranString(const char*);
 	FranString(const FranString&);
 	FranString& FranString::operator=(const FranString &strInstance);
@@ -23,7 +23,7 @@ public:
 	bool empty() const;
 	char* data() const;
 	int length() const;
-	~FranString(void);
+	~FranString();
 
 private:
 	
