@@ -36,11 +36,6 @@ FranString::FranString(const FranString &strInstance)
 		
 		memset(&internalString, 0, currentLength);
 		memcpy(&internalString, strInstance.data(), currentLength);
-
-		currentLength = strInstance.length + 1;
-		internalString = std::unique_ptr<char[]>(new char[currentLength]);
-		memset(&internalString, 0, currentLength);
-		memcpy(&internalString, &strInstance.internalString, strInstance.length());
 	}
 }
 
@@ -48,7 +43,7 @@ char * FranString::data() const
 {
 	if (this -> internalString)
 	{
-		return this -> &internalString;
+		return this -> internalString.get();
 	}
 	else
 	{
@@ -67,7 +62,11 @@ FranString& FranString::operator=(const FranString &strInstance)
 {
 	if (strInstance.empty() == false)
 	{
-		internalString = strInstance.internalString;
+		currentLength = strInstance.length() + 1;
+		internalString = std::unique_ptr<char[]>(new char[currentLength]);
+
+		memset(&internalString, 0, currentLength);
+		memcpy(&internalString, strInstance.data(), currentLength);
 	}
 	return *this;
 }
@@ -75,15 +74,29 @@ FranString& FranString::operator=(const FranString &strInstance)
 /* '+' operator */
 FranString& FranString::operator+(const FranString &strInstance)
 {
-	currentLength = currentLength + strInstance.length();
-	FranString *pStrResult = &FranString(newString.data());
+	int newLength = currentLength + strInstance.length();
+
+	std::unique_ptr<char[]> newString = std::unique_ptr<char[]>(new char[currentLength]);
+
+	memset(&newString, 0, newLength);
+	memcpy(&newString, &internalString, currentLength - 1);
+	memcpy(&newString, strInstance.data(), strInstance.length());
+
+	FranString *pStrResult = &FranString(newString.get());
 	return *pStrResult;
 }
 
 FranString& FranString::operator+=(const FranString &strInstance)
 {
-	std::string newString = internalString + strInstance.internalString;
-	internalString = newString;
+	int newLength = currentLength + strInstance.length();
+
+	std::unique_ptr<char[]> newString = std::unique_ptr<char[]>(new char[currentLength]);
+
+	memset(&newString, 0, newLength);
+	memcpy(&newString, &internalString, currentLength - 1);
+	memcpy(&newString, strInstance.data(), strInstance.length());
+
+	currentLength = newLength;
 	return *this;
 }
 
