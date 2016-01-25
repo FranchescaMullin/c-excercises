@@ -1,9 +1,11 @@
 #pragma once
 #include <string>
+#include <memory>
 
 class FranString
 {
-	std::string internalString;
+	std::unique_ptr<char[]> internalString;
+	int currentLength;
 	
 public:
 	FranString(void);
@@ -19,7 +21,13 @@ public:
 	friend bool FranString::operator!=(const FranString &strLeft, const char* &strRight);
 
 	bool empty() const;
+	char* data() const;
 	int length() const;
 	~FranString(void);
+
+private:
+	
 };
+
+
 
