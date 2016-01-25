@@ -5,38 +5,61 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
-
+#include <memory>
 
 #include "string.h"
 
 // Default Constructor
-FranString::FranString(void)
+FranString::FranString()
 {
 	
 }
 
-FranString::FranString(const char *pcValue)
+FranString::FranString(const char *value)
 {
-	if (pcValue)
+	if (value)
 	{
-		internalString = std::string(pcValue);
+		currentLength = strlen(value) + 1;
+		internalString = std::unique_ptr<char[]>( new char[currentLength] );
+		memset(&internalString, 0, currentLength);
+		memcpy(&internalString, value, strlen(value));
 	}
 }
 
 // Copy Constructor
 FranString::FranString(const FranString &strInstance)
 {
-	if (strInstance.internalString.empty() == false)
+	if (strInstance.internalString)
 	{
-		std::string newString = strInstance.internalString;
-		internalString = newString;
+		currentLength = strInstance.length() + 1;
+		internalString = std::unique_ptr<char[]>( new char[currentLength] );
+		
+		memset(&internalString, 0, currentLength);
+		memcpy(&internalString, strInstance.data(), currentLength);
+
+		currentLength = strInstance.length + 1;
+		internalString = std::unique_ptr<char[]>(new char[currentLength]);
+		memset(&internalString, 0, currentLength);
+		memcpy(&internalString, &strInstance.internalString, strInstance.length());
+	}
+}
+
+char * FranString::data() const
+{
+	if (this -> internalString)
+	{
+		return this -> &internalString;
+	}
+	else
+	{
+		return NULL;
 	}
 }
 
 /* empty() */
 bool FranString::empty() const
 {
-	return internalString.empty();
+	return currentLength - 1 > 0;
 }
 
 /* '=' operator */
@@ -52,7 +75,7 @@ FranString& FranString::operator=(const FranString &strInstance)
 /* '+' operator */
 FranString& FranString::operator+(const FranString &strInstance)
 {
-	std::string newString = internalString + strInstance.internalString;
+	currentLength = currentLength + strInstance.length();
 	FranString *pStrResult = &FranString(newString.data());
 	return *pStrResult;
 }
@@ -89,10 +112,10 @@ bool operator!=(const FranString &strLeft, const char* &strRight)
 int FranString::length() const
 {
 	//std::cout << currentLength << std::endl;
-	return internalString.length();
+	return currentLength -1;
 }
 
-FranString::~FranString(void)
+FranString::~FranString()
 {
 	
 }
